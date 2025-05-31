@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#232323"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- Logo -->
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_moddiemovies_logo"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Başlık -->
+        <TextView
+            android:id="@+id/registerTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MoodieMovies’e Kaydolun"
+            android:textColor="#fff"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"/>
+
+        <!-- E-posta -->
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="E-posta *"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="#fff"
+            android:textColorHint="#aaaaaa"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Şifre -->
+        <EditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Şifre *"
+            android:inputType="textPassword"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="#fff"
+            android:textColorHint="#aaaaaa"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Kullanıcı adı -->
+        <EditText
+            android:id="@+id/usernameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Kullanıcı adı *"
+            android:inputType="textPersonName"
+            android:background="@drawable/rounded_edittext"
+            android:textColor="#fff"
+            android:textColorHint="#aaaaaa"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Şifre uyarı metni -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Şifre en az 15 karakter veya en az 8 karakterden oluşmalı ve içerisinde bir rakam ve küçük harf bulunmalıdır."
+            android:textColor="#cccccc"
+            android:textSize="12sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Kayıt ol butonu -->
+        <Button
+            android:id="@+id/registerButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="HESABI OLUŞTUR >"
+            android:textColor="#fff"
+            android:backgroundTint="#191919"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Alt açıklama -->
+        <TextView
+            android:id="@+id/termsTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bir hesap oluşturarak Hizmet Şartlarını kabul etmiş olursunuz. MoodieMovies’in gizlilik uygulamaları hakkında daha fazla bilgi için MoodieMovies Gizlilik Beyanı’na bakın. Size ara sıra hesapla ilgili e-postalar göndereceğiz."
+            android:textColor="#aaaaaa"
+            android:textSize="10sp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Özellikler bölümü ve poster grid'i istersen sonra ekleriz. -->
+
+    </LinearLayout>
+</ScrollView>

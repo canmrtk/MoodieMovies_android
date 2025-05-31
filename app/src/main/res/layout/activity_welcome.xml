@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#191919"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logoImageView"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:src="@drawable/ic_moddiemovies_logo"
+        android:contentDescription="Logo"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Başlık -->
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MODDIEMOVIES"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Açıklama -->
+    <TextView
+        android:id="@+id/descriptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="İzlediğiniz filmleri takip edin.\nGörmek istediklerinizi kaydedin.\nArkadaşlarınıza neyin iyi olduğunu söyleyin."
+        android:textColor="#CCCCCC"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Kabul Et ve Katıl -->
+    <Button
+        android:id="@+id/signUpButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Kabul Et ve Katıl"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#209146"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Facebook ile Devam Et -->
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/facebookSignInButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Facebook ile Devam et"
+        android:textColor="#FFFFFF"
+        app:icon="@drawable/ic_facebook_logo"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp"
+        app:iconSize="24dp"
+        android:backgroundTint="#4267B2"
+        android:layout_marginBottom="8dp"/>
+
+
+
+    <!-- Google ile Devam Et -->
+    <Button
+        android:id="@+id/googleSignInButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Google ile Devam et"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#222222"
+        android:drawableLeft="@drawable/ic_google_logo"
+        android:layout_marginBottom="16dp"/>
+
+
+    <!-- Ayraç -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="——  Ya da  ——"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Oturum Açın -->
+    <TextView
+        android:id="@+id/signInTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Oturum Açın"
+        android:textColor="#4ec9f7"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:focusable="true"/>
+</LinearLayout>
