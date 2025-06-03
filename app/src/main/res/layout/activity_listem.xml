@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayoutListem" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start"
+    tools:context=".ui.ListemActivity">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#1E1F26">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1E1F26"
+            app:elevation="0dp">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarListem"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Toplayın, küratörlüğünü yapın ve paylaşın. Listeler, filmleri gruplandırmanın mükemmel bir yoldur"
+                    android:textColor="#E5E5EA"
+                    android:textSize="18sp"
+                    android:gravity="center_horizontal"
+                    android:lineSpacingMultiplier="1.2"
+                    android:layout_marginBottom="20dp"/>
+
+                <Button
+                    android:id="@+id/btnCreateNewList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Kendi listeni oluşturmaya başla."
+                    android:backgroundTint="#48484A"
+                    android:textColor="@android:color/white"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
+                    app:cornerRadius="8dp"
+                    android:layout_marginBottom="30dp"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:text="BU HAFTA POPÜLER"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvMorePopularLists"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:text="Daha Fazla"
+                        android:textColor="#4CAF50"
+                        android:textSize="14sp"/>
+                </RelativeLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewPopularLists"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_popular_list_card"
+                    tools:itemCount="3"
+                    android:clipToPadding="false"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarListem"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvNoPopularLists"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Şu an görüntülenecek popüler liste bulunmuyor."
+                    android:textColor="#80FFFFFF"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationViewListem" android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"   app:menu="@menu/drawer_menu" />        </androidx.drawerlayout.widget.DrawerLayout>

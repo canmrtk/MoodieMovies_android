@@ -1,108 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#232323"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#1E1F26"
+    android:fillViewport="true">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
+        android:padding="0dp"
         android:gravity="center_horizontal">
 
-        <!-- Logo -->
-        <ImageView
-            android:id="@+id/logoImageView"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/ic_moddiemovies_logo"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Başlık -->
-        <TextView
-            android:id="@+id/registerTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MoodieMovies’e Kaydolun"
-            android:textColor="#fff"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"
-            android:gravity="center"/>
-
-        <!-- E-posta -->
-        <EditText
-            android:id="@+id/emailEditText"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="E-posta *"
-            android:inputType="textEmailAddress"
-            android:background="@drawable/rounded_edittext"
-            android:textColor="#fff"
-            android:textColorHint="#aaaaaa"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- Şifre -->
-        <EditText
-            android:id="@+id/passwordEditText"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Şifre *"
-            android:inputType="textPassword"
-            android:background="@drawable/rounded_edittext"
-            android:textColor="#fff"
-            android:textColorHint="#aaaaaa"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- Kullanıcı adı -->
-        <EditText
-            android:id="@+id/usernameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Kullanıcı adı *"
-            android:inputType="textPersonName"
-            android:background="@drawable/rounded_edittext"
-            android:textColor="#fff"
-            android:textColorHint="#aaaaaa"
-            android:padding="12dp"
-            android:layout_marginBottom="20dp"/>
-
-        <!-- Şifre uyarı metni -->
-        <TextView
+        <!-- Üst Gri Form Alanı -->
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Şifre en az 15 karakter veya en az 8 karakterden oluşmalı ve içerisinde bir rakam ve küçük harf bulunmalıdır."
-            android:textColor="#cccccc"
-            android:textSize="12sp"
-            android:layout_marginBottom="12dp"/>
+            android:padding="24dp"
+            android:background="#AAAAAAB3">
 
-        <!-- Kayıt ol butonu -->
-        <Button
-            android:id="@+id/registerButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="HESABI OLUŞTUR >"
-            android:textColor="#fff"
-            android:backgroundTint="#191919"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            <!-- Logo ve Başlık -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="12dp">
 
-        <!-- Alt açıklama -->
-        <TextView
-            android:id="@+id/termsTextView"
+                <ImageView
+                    android:id="@+id/logoImageView"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_moddiemovies_logo"
+                    android:contentDescription="Logo"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MoodieMovies’e\nKaydolun"
+                    android:textColor="#fff"
+                    android:textStyle="bold"
+                    android:textSize="22sp"
+                    android:gravity="center_vertical" />
+            </LinearLayout>
+
+            <!-- Form -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="E-posta *"
+                android:textColor="#fff"
+                android:textSize="14sp"/>
+            <EditText
+                android:id="@+id/emailEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_edittext"
+                android:hint="E-posta"
+                android:inputType="textEmailAddress"
+                android:textColor="#fff"
+                android:textColorHint="#AAA"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Şifre *"
+                android:textColor="#fff"
+                android:textSize="14sp"/>
+            <EditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_edittext"
+                android:hint="Şifre"
+                android:inputType="textPassword"
+                android:textColor="#fff"
+                android:textColorHint="#AAA"
+                android:padding="10dp"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Şifre en az 15 karakter veya en az 8 karakterden oluşmalı ve içerisinde bir rakam ve küçük harf bulunmalıdır."
+                android:textColor="#AAA"
+                android:textSize="12sp"
+                android:layout_marginBottom="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kullanıcı adı *"
+                android:textColor="#fff"
+                android:textSize="14sp"/>
+            <EditText
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_edittext"
+                android:hint="Kullanıcı adı"
+                android:inputType="textPersonName"
+                android:textColor="#fff"
+                android:textColorHint="#AAA"
+                android:padding="10dp"
+                android:layout_marginBottom="16dp"/>
+
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="HESABI OLUŞTUR >"
+                android:backgroundTint="#23232a"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- Bilgilendirme yazısı -->
+            <TextView
+                android:id="@+id/legalTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bir hesap oluşturarak Hizmet Şartları'nı kabul etmiş olursunuz. MoodieMovies’in gizlilik uygulamaları hakkında daha fazla bilgi için MoodieMovies Gizlilik Beyanı’na bakın. Size ara sıra hesapla ilgili e-postalar göndereceğiz."
+                android:textColor="#fff"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="4dp"/>
+
+        </LinearLayout>
+
+        <!-- Alt siyah bölüm -->
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Bir hesap oluşturarak Hizmet Şartlarını kabul etmiş olursunuz. MoodieMovies’in gizlilik uygulamaları hakkında daha fazla bilgi için MoodieMovies Gizlilik Beyanı’na bakın. Size ara sıra hesapla ilgili e-postalar göndereceğiz."
-            android:textColor="#aaaaaa"
-            android:textSize="10sp"
-            android:layout_marginBottom="24dp"/>
+            android:background="#1E1F26"
+            android:padding="18dp"
+            android:gravity="center_horizontal">
 
-        <!-- Özellikler bölümü ve poster grid'i istersen sonra ekleriz. -->
+            <!-- Hizmet Şartları, popup açacak -->
+            <TextView
+                android:id="@+id/legalPopupTrigger"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ücretsiz Hesabınızı Oluşturun"
+                android:textColor="#fff"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"
+                android:clickable="true"
+                android:focusable="true"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MoodieMovies'in temel özelliklerini keşfedin."
+                android:textColor="#fff"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Film örnekleri (image grid gibi) -->
+            <ImageView
+                android:layout_width="260dp"
+                android:layout_height="120dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/signup_poster_example"
+                android:background="@drawable/rounded_edittext"
+                android:layout_gravity="center"/>
+            <!-- Yukarıdaki görseli bir grid gibi göstermek istersen LinearLayout+image ekleyebilirsin. -->
+
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

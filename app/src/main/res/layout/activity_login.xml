@@ -3,115 +3,183 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#191919">
+    android:background="#191919"
+    android:fillViewport="true">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="24dp"
         android:gravity="center_horizontal">
 
+        <!-- Logo -->
         <ImageView
             android:id="@+id/logoImageView"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:src="@drawable/ic_moddiemovies_logo"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Logo" />
 
+        <!-- Avantaj Başlık -->
         <TextView
+            android:id="@+id/advantageTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="MoodieMovies Üyeliğinizin Avantajları"
+            android:text="MoodieMovies Üyeliğinizin\nAvantajları"
             android:textColor="#fff"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="16dp" />
 
-        <!-- Avantajlar -->
-        <TextView
+        <!-- Avantaj Listesi -->
+        <LinearLayout
+            android:id="@+id/advantageList"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="◆ Kişiselleştirilmiş Öneriler\n◆ İzleme Listeniz\n◆ Puanlarınız\n◆ MoodieMovies’e Katkıda Bulunun"
-            android:textColor="#4ec9f7"
-            android:textSize="15sp"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="32dp">
 
-        <!-- Kullanıcı Giriş başlığı -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  \u25C6 Kişiselleştirilmiş Öneriler"
+                android:textColor="#39A9FF"
+                android:textSize="15sp"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  \u25C6 İzleme Listeniz"
+                android:textColor="#39A9FF"
+                android:textSize="15sp"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  \u25C6 Puanlarınız"
+                android:textColor="#39A9FF"
+                android:textSize="15sp"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  \u25C6 MoodieMovies'e Katkıda Bulunun"
+                android:textColor="#39A9FF"
+                android:textSize="15sp"/>
+        </LinearLayout>
+
+        <!-- Kullanıcı Giriş Başlığı -->
         <TextView
+            android:id="@+id/loginTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Kullanıcı Giriş"
             android:textColor="#fff"
             android:textStyle="bold"
-            android:textSize="17sp"
-            android:layout_marginBottom="12dp"/>
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
 
         <!-- E-posta -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="E-posta"
+            android:textColor="#fff"
+            android:textSize="14sp"/>
         <EditText
             android:id="@+id/emailEditText"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="40dp"
+            android:background="@drawable/rounded_edittext"
             android:hint="E-posta"
             android:inputType="textEmailAddress"
-            android:background="@drawable/rounded_edittext"
             android:textColor="#fff"
-            android:textColorHint="#aaaaaa"
-            android:padding="12dp"
-            android:layout_marginBottom="10dp"/>
+            android:textColorHint="#AAA"
+            android:padding="10dp"
+            android:layout_marginBottom="12dp"/>
 
-        <!-- Şifre -->
+        <!-- Şifre ve Parola Sıfırlama Yardımı aynı satırda -->
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
-
-            <EditText
-                android:id="@+id/passwordEditText"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:hint="Şifre"
-                android:inputType="textPassword"
-                android:background="@drawable/rounded_edittext"
-                android:textColor="#fff"
-                android:textColorHint="#aaaaaa"
-                android:padding="12dp"/>
+            android:layout_marginBottom="0dp">
 
             <TextView
-                android:id="@+id/forgotPasswordTextView"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Şifre"
+                android:textColor="#fff"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/resetPasswordTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Parola sıfırlama yardımı"
-                android:textColor="#4ec9f7"
-                android:textSize="12sp"
+                android:textColor="#39A9FF"
+                android:textSize="14sp"
                 android:layout_marginStart="10dp"
-                android:clickable="true"/>
+                android:clickable="true"
+                android:focusable="true"/>
         </LinearLayout>
 
-        <!-- Giriş Yap butonu -->
+        <!-- Şifre EditText -->
+        <EditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/rounded_edittext"
+            android:hint="Şifre"
+            android:inputType="textPassword"
+            android:textColor="#fff"
+            android:textColorHint="#AAA"
+            android:padding="10dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Giriş Yap Butonu -->
         <Button
             android:id="@+id/loginButton"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="Giriş Yap"
-            android:textColor="#fff"
             android:backgroundTint="#1D6A31"
+            android:textColor="#fff"
             android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginBottom="16dp"/>
+            android:textSize="22sp"
+            android:layout_marginBottom="12dp"
+            android:layout_gravity="center"/>
 
-        <!-- Oturumu açık tut (isteğe bağlı) -->
-        <TextView
+        <!-- Oturumu açık tut ve Detaylar -->
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Oturumumu açık tut. Detaylar"
-            android:textColor="#cccccc"
-            android:textSize="12sp"
-            android:gravity="center"/>
+            android:gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/rememberMeCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oturumu açık tut."
+                android:textColor="#fff"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/detailsTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Detaylar"
+                android:textColor="#39A9FF"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp"
+                android:textSize="15sp"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

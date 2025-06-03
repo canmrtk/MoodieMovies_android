@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.HomeActivity"
+    tools:openDrawer="start">
 
     <!-- ANA İÇERİK -->
     <LinearLayout
@@ -15,15 +18,34 @@
 
         <!-- NAVBAR / TOOLBAR -->
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_home"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="#23232a"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:titleTextColor="@android:color/white"
             android:elevation="4dp"
-            app:title=""
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <!-- Ana içerik scroll edilebilsin diye -->
+
+        <!-- Ana içerik scroll edilebilsin diye --><ProgressBar
+        android:id="@+id/progressBarHome" style="?android:attr/progressBarStyleLarge" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" /> <TextView
+        android:id="@+id/tvEmptyViewHome" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Yükleniyor..."
+        android:textColor="@android:color/darker_gray"
+        android:textSize="16sp"
+        android:visibility="gone" /> <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/filmsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_film" />
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -80,13 +102,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"/>
 
-                <!-- FİLM KARTLARI: YATAY RECYCLERVIEW -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/filmsRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="180dp"
-                    android:orientation="horizontal"
-                    android:overScrollMode="never"/>
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
