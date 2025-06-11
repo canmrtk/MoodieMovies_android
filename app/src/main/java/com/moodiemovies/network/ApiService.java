@@ -13,9 +13,14 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 
 public interface ApiService {
 
+    @FormUrlEncoded // Basit bir string token göndermek için FormUrlEncoded daha uygun olabilir
+    @POST("api/v1/auth/google/mobile-signin")
+    Call<LoginResponse> signInWithGoogle(@Field("token") String idToken);
     // --- AUTH ENDPOINTS ---
     @POST("api/v1/auth/login")
     Call<LoginResponse> loginUser(@Body LoginRequest request);

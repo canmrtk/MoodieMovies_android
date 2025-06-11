@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
 
                         if (response.isSuccessful() && response.body() != null) {
-                            String token = response.body().token;
+                            String token = response.body().getAccessToken();
                             SharedPreferences prefs = getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE);
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putString("authToken", token); // "authToken" key'i ile kaydet
