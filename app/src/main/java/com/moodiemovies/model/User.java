@@ -1,102 +1,50 @@
-// com.moodiemovies.model.User.java
 package com.moodiemovies.model;
 
-// Eğer backend LocalDateTime'ı ISO 8601 string formatında gönderiyorsa,
-// Retrofit ve Gson genellikle bunu String olarak alır.
-// İstersen Gson için özel bir LocalDateTime deserializer da yazılabilir
-// veya direkt String olarak alıp ihtiyaç duyulduğunda parse edebilirsin.
-// Şimdilik String olarak alalım.
-// import java.time.LocalDateTime; // Eğer Gson ile direkt mapleyebiliyorsan veya custom deserializer varsa
+import com.google.gson.annotations.SerializedName;
 
 public class User {
-    private String id;
-    private String name;
+
+    @SerializedName("UserID")
+    private int userId;
+
+    @SerializedName("Username")
+    private String username;
+
+    @SerializedName("Email")
     private String email;
-    private String authType; // LOCAL, GOOGLE, FACEBOOK
-    private String providerId; // Opsiyonel, sadece OAuth2 kullanıcıları için
-    private String createdDate; // Backend'den gelen LocalDateTime'ı String olarak alalım
-    private String lastUpdatedDate; // Backend'den gelen LocalDateTime'ı String olarak alalım
 
-    // Boş constructor (Gson için gerekebilir)
-    public User() {
-    }
+    @SerializedName("PasswordHash")
+    private String passwordHash;
 
-    // Dolu constructor (opsiyonel)
-    public User(String id, String name, String email, String authType, String providerId, String createdDate, String lastUpdatedDate) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.authType = authType;
-        this.providerId = providerId;
-        this.createdDate = createdDate;
-        this.lastUpdatedDate = lastUpdatedDate;
-    }
+    @SerializedName("FirstName")
+    private String firstName;
 
-    // Getters
-    public String getId() {
-        return id;
-    }
+    @SerializedName("LastName")
+    private String lastName;
 
-    public String getName() {
-        return name;
-    }
+    @SerializedName("ProfilePictureURL")
+    private String profilePictureUrl;
 
-    public String getEmail() {
-        return email;
-    }
+    @SerializedName("CreatedAt")
+    private String createdAt;
 
-    public String getAuthType() {
-        return authType;
-    }
+    // Getter Methods
+    public int getUserId() { return userId; }
+    public String getUsername() { return username; }
+    public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getProfilePictureUrl() { return profilePictureUrl; }
+    public String getCreatedAt() { return createdAt; }
 
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public String getCreatedDate() {
-        return createdDate;
-    }
-
-    public String getLastUpdatedDate() {
-        return lastUpdatedDate;
-    }
-
-    // Setters
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setAuthType(String authType) {
-        this.authType = authType;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
-    }
-
-    public void setCreatedDate(String createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public void setLastUpdatedDate(String lastUpdatedDate) {
-        this.lastUpdatedDate = lastUpdatedDate;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", authType='" + authType + '\'' +
-                '}';
-    }
+    // Setter Methods
+    public void setUserId(int userId) { this.userId = userId; }
+    public void setUsername(String username) { this.username = username; }
+    public void setEmail(String email) { this.email = email; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 }

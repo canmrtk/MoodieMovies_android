@@ -1,4 +1,4 @@
-package com.moodiemovies.network;
+package com.moodiemovies.model;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

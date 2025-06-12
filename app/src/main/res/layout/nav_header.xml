@@ -1,38 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/colorPrimaryDark"
-    android:padding="16dp"
-    android:orientation="vertical"
+    android:layout_height="180dp"
+    android:background="@drawable/background_gradient"
     android:gravity="bottom"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/nav_header_profile_image"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/placeholder_avatar"
-        app:civ_border_width="2dp"
-        app:civ_border_color="@android:color/white"/>
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/mmv_logo" />
 
     <TextView
-        android:id="@+id/nav_header_user_name"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
         android:text="Kullanıcı Adı"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@android:color/white"
-        android:textStyle="bold"/>
-
-    <TextView
-        android:id="@+id/nav_header_user_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="kullanici@example.com"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"/>
-
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 </LinearLayout>

@@ -1,108 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#191919"
-    android:gravity="center"
-    android:padding="24dp">
+    android:background="#1E1F26"
+    android:fillViewport="true">
 
-    <!-- Logo -->
-    <ImageView
-        android:id="@+id/logoImageView"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:src="@drawable/ic_moddiemovies_logo"
-        android:contentDescription="Logo"
-        android:layout_gravity="center"
-        android:layout_marginBottom="24dp"/>
-
-    <!-- Başlık -->
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="MODDIEMOVIES"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="24sp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="12dp"/>
-
-    <!-- Açıklama -->
-    <TextView
-        android:id="@+id/descriptionTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="İzlediğiniz filmleri takip edin.\nGörmek istediklerinizi kaydedin.\nArkadaşlarınıza neyin iyi olduğunu söyleyin."
-        android:textColor="#CCCCCC"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"/>
-
-    <!-- Kabul Et ve Katıl -->
-    <Button
-        android:id="@+id/signUpButton"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Kabul Et ve Katıl"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#209146"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Facebook ile Devam Et -->
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/facebookSignInButton"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Facebook ile Devam et"
-        android:textColor="#FFFFFF"
-        app:icon="@drawable/ic_facebook_logo"
-        app:iconGravity="textStart"
-        app:iconPadding="12dp"
-        app:iconSize="24dp"
-        android:backgroundTint="#4267B2"
-        android:layout_marginBottom="8dp"/>
-
-
-
-    <!-- Google ile Devam Et -->
-    <Button
-        android:id="@+id/googleSignInButton"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Google ile Devam et"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#222222"
-        android:drawableLeft="@drawable/ic_google_logo"
-        android:layout_marginBottom="16dp"/>
-
-
-    <!-- Ayraç -->
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="——  Ya da  ——"
-        android:textColor="#666666"
-        android:textSize="14sp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="12dp"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
 
-    <!-- Oturum Açın -->
-    <TextView
-        android:id="@+id/signInTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Oturum Açın"
-        android:textColor="#4ec9f7"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:clickable="true"
-        android:focusable="true"/>
-</LinearLayout>
+        <!-- Logo -->
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/mmv_logo"
+            android:contentDescription="Logo" />
+
+        <!-- Uygulama Adı -->
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="MODDIEMOVIES"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:fontFamily="@font/montserrat_bold" />
+
+        <!-- Alt Açıklama -->
+        <TextView
+            android:id="@+id/descriptionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="İzlediğiniz filmleri takip edin.\nGörmek istediklerinizi kaydedin.\nArkadaşlarınıza neyin iyi olduğunu söyleyin."
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:fontFamily="@font/inriaserif_italic" />
+
+        <!-- Kullanım Şartları -->
+        <TextView
+            android:id="@+id/termsText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Bir hesap oluşturarak Hizmet Şartları’nı kabul etmiş olursunuz. MoodieMovies’in gizlilik uygulamaları hakkında daha fazla bilgi için MoodieMovies Gizlilik Beyanı’na bakın. Size ara sıra hesapla ilgili e-postalar göndereceğiz."
+            android:textColor="#888888"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:fontFamily="@font/montserrat_regular" />
+
+        <!-- Katıl Butonu -->
+        <Button
+            android:id="@+id/emailSignInButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:text="Kabul Et ve Katıl"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#1D6A31"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:fontFamily="@font/montserrat_medium" />
+
+        <!-- Facebook Butonu -->
+        <Button
+            android:id="@+id/facebookSignInButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_facebook"
+            android:drawableStart="@drawable/ic_facebook"
+            android:drawablePadding="12dp"
+            android:paddingStart="24dp"
+            android:text="Facebook ile Devam et"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/montserrat_medium"/>
+
+        <!-- Google Butonu -->
+        <Button
+            android:id="@+id/googleSignInButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/button_google"
+            android:drawableStart="@drawable/ic_google"
+            android:drawablePadding="12dp"
+            android:paddingStart="24dp"
+            android:text="Google ile Devam et"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/montserrat_medium"/>
+
+        <!-- Ya da çizgili -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#555555" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Ya da  "
+                android:textColor="#AAAAAA"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#555555" />
+        </LinearLayout>
+
+        <!-- Oturum Aç -->
+        <TextView
+            android:id="@+id/signUpText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Oturum Açın"
+            android:textColor="#1D6A31"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/montserrat_medium" />
+    </LinearLayout>
+</ScrollView>
