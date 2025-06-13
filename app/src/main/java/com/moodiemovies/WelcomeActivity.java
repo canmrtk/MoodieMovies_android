@@ -7,86 +7,111 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.moodiemovies.model.AuthResponse;
+import com.moodiemovies.model.RetrofitClient;
+import com.moodiemovies.network.ApiService;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    private static final String TAG = "WelcomeActivity";
     private GoogleSignInClient mGoogleSignInClient;
-    private ActivityResultLauncher<Intent> googleSignInLauncher;
+    private static final int RC_SIGN_IN = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Yeni, birebir aynı olan layout dosyasını yüklüyoruz.
         setContentView(R.layout.activity_welcome);
 
-        // GoogleSignInOptions'ı yapılandır
+        Button googleButton = findViewById(R.id.googleSignInButton);
+        Button emailSignUpButton = findViewById(R.id.emailSignUpButton);
+        TextView loginText = findViewById(R.id.loginText);
+
+        // 🔹 Google yapılandırması
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
+
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Google giriş sonucunu işlemek için ActivityResultLauncher'ı hazırla
-        googleSignInLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK) {
-                        Intent data = result.getData();
-                        Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-                        handleSignInResult(task);
-                    }
-                });
 
-        // Yeni tasarımdaki UI elemanlarını bağla
-        Button googleSignInButton = findViewById(R.id.googleSignInButton);
-        Button emailSignInButton = findViewById(R.id.emailSignInButton);
-        TextView signUpText = findViewById(R.id.signUpText);
+        // 🔹 Google ile Giriş
+        googleButton.setOnClickListener(v -> {
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
 
-        // Butonlara tıklama olaylarını ata
-        googleSignInButton.setOnClickListener(v -> signInWithGoogle());
-
-        emailSignInButton.setOnClickListener(v -> {
-            Intent intent = new Intent(WelcomeActivity.this, LoginActivity.class);
+        // ✅ KABUL ET VE KATIL (register sayfasına yönlendir)
+        emailSignUpButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RegisterActivity.class);
             startActivity(intent);
         });
 
-        signUpText.setOnClickListener(v -> {
-            Intent intent = new Intent(WelcomeActivity.this, RegisterActivity.class);
+        // ✅ OTURUM AÇ (login sayfasına yönlendir)
+        loginText.setOnClickListener(v -> {
+            Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         });
     }
 
-    private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        googleSignInLauncher.launch(signInIntent);
-    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount acct = task.getResult(ApiException.class);
+                String idToken = acct.getIdToken();  // ← BURADA alıyoruz
+                sendGoogleTokenToBackend(idToken);
+            } catch (ApiException e) {
 
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.d(TAG, "Google ile giriş başarılı: " + account.getEmail());
-            Toast.makeText(this, "Giriş başarılı: " + account.getDisplayName(), Toast.LENGTH_SHORT).show();
-
-            // TODO: Alınan token'ı backend'e gönderip, kendi JWT token'ınızı alın ve kaydedin.
-            // Ardından ana ekrana yönlendirin.
-            Intent intent = new Intent(this, HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-
-        } catch (ApiException e) {
-            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            Toast.makeText(this, "Google ile giriş başarısız oldu. Hata Kodu: " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
+                Log.e("GoogleSignIn", "Kod: " + e.getStatusCode(), e);
+                Log.e("GoogleSignIn", "fail code=" + e.getStatusCode());
+                Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show();
+            }
         }
     }
+    private void sendGoogleTokenToBackend(String idToken) {
+        Map<String,String> payload = new HashMap<>();
+        payload.put("idToken", idToken);
+
+        ApiService api = RetrofitClient.getClient().create(ApiService.class);
+        api.loginWithGoogle(payload).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> resp) {
+                if (resp.isSuccessful() && resp.body() != null) {
+                    String jwt = resp.body().getAccessToken();
+                    // 1) SharedPreferences’a kaydet
+                    getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE)
+                            .edit()
+                            .putString("user_token", jwt)
+                            .apply();
+                    // 2) İstersen user bilgilerini de kaydedebilirsin
+                    // 3) Ana ekrana geç
+                    startActivity(new Intent(WelcomeActivity.this, HomeActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(WelcomeActivity.this, "Giriş başarısız", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                Toast.makeText(WelcomeActivity.this, "Sunucu hatası", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

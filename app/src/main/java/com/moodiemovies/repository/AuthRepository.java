@@ -1,22 +1,30 @@
 package com.moodiemovies.repository;
 
 import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
 import com.moodiemovies.model.AuthResponse;
 import com.moodiemovies.model.LoginRequest;
-import com.moodiemovies.model.UserRegistrationRequestDTO; // Doğru DTO import edildi
+import com.moodiemovies.model.UserDTO;
+import com.moodiemovies.model.UserRegistrationRequestDTO;
 import com.moodiemovies.network.ApiClient;
 import com.moodiemovies.network.ApiService;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import java.io.IOException;
 
 public class AuthRepository {
 
+    private static final String TAG = "AuthRepository";
     private final ApiService apiService;
     private static AuthRepository instance;
+
+    private AuthRepository() {
+        apiService = ApiClient.getClient().create(ApiService.class);
+    }
 
     public static AuthRepository getInstance() {
         if (instance == null) {
@@ -25,88 +33,82 @@ public class AuthRepository {
         return instance;
     }
 
-    private AuthRepository() {
-        apiService = ApiClient.getClient().create(ApiService.class);
-    }
-
-    public LiveData<AuthResponse> loginUser(String username, String password) {
-
+    /**
+     * Kullanıcıyı email+password ile login eder.
+     * @param email    Kullanıcının e-posta adresi
+     * @param password Kullanıcının şifresi
+     * @return LiveData içinde AuthResponse (başarılıysa gerçek, değilse hata mesajı)
+     */
+    public LiveData<AuthResponse> loginUser(String email, String password) {
         MutableLiveData<AuthResponse> data = new MutableLiveData<>();
 
-        LoginRequest loginRequest = new LoginRequest(username, password);
+        // Doğru LoginRequest oluşturuluyor
+        LoginRequest loginRequest = new LoginRequest(email, password);
 
-
-
-        apiService.loginUser(loginRequest).enqueue(new Callback<AuthResponse>() {
-
+        apiService.login(loginRequest).enqueue(new Callback<AuthResponse>() {
             @Override
-
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-
-                if (response.isSuccessful()) {
-
+                if (response.isSuccessful() && response.body() != null) {
+                    // Başarılı yanıt gelince doğrudan yayımlıyoruz
                     data.setValue(response.body());
-
                 } else {
-
+                    // HTTP hatası (4xx / 5xx)
                     AuthResponse errorResponse = new AuthResponse();
-
                     errorResponse.setMessage("Giriş başarısız (Kod: " + response.code() + ")");
-
                     data.setValue(errorResponse);
-
+                    Log.e(TAG, "loginUser onResponse failure: code=" + response.code());
                 }
-
             }
-
-
 
             @Override
-
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-
-                Log.e("AuthRepository", "Giriş işlemi ağ hatası", t);
-
+                // Ağ veya diğer hatalar
                 AuthResponse errorResponse = new AuthResponse();
-
                 errorResponse.setMessage("Sunucuya bağlanılamadı: " + t.getMessage());
-
                 data.setValue(errorResponse);
-
+                Log.e(TAG, "loginUser onFailure", t);
             }
-
         });
 
         return data;
-
     }
 
-    // registerUser metodu doğru DTO'yu kullanacak şekilde güncellendi
+    /**
+     * Yeni kullanıcı kaydı yapar.
+     * @param name     Kullanıcının adı
+     * @param email    Kullanıcının e-posta adresi
+     * @param password Kullanıcının şifresi
+     * @return LiveData içinde AuthResponse (başarılıysa gerçek, değilse hata mesajı)
+     */
     public LiveData<AuthResponse> registerUser(String name, String email, String password) {
         MutableLiveData<AuthResponse> data = new MutableLiveData<>();
-        // Artık backend'in beklediği doğru nesneyi oluşturuyoruz.
-        UserRegistrationRequestDTO registrationRequest = new UserRegistrationRequestDTO(name, email, password);
+
+        // Backend tarafı 'name','email','password' bekliyor
+        UserRegistrationRequestDTO registrationRequest =
+                new UserRegistrationRequestDTO(name, email, password);
 
         apiService.registerUser(registrationRequest).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     data.setValue(response.body());
                 } else {
                     AuthResponse errorResponse = new AuthResponse();
                     errorResponse.setMessage("Kayıt başarısız (Kod: " + response.code() + ")");
                     data.setValue(errorResponse);
+                    Log.e(TAG, "registerUser onResponse failure: code=" + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                Log.e("AuthRepository", "Kayıt işlemi ağ hatası", t);
                 AuthResponse errorResponse = new AuthResponse();
                 errorResponse.setMessage("Sunucuya bağlanılamadı: " + t.getMessage());
                 data.setValue(errorResponse);
+                Log.e(TAG, "registerUser onFailure", t);
             }
         });
+
         return data;
     }
 }

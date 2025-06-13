@@ -1,104 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
-    android:padding="30dp"
-    tools:context=".LoginActivity">
-
-    <RelativeLayout
-        android:id="@+id/headerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true">
-
-        <ImageView
-            android:id="@+id/backButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_arrow_back"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:contentDescription="Geri"
-            android:padding="4dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Giriş Yap"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-    </RelativeLayout>
+    android:background="#1E1F26"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_centerInParent="true">
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
-        <EditText
-            android:id="@+id/username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Kullanıcı Adı"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:backgroundTint="@android:color/white"/>
+        <!-- Logo -->
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/mmv_logo"
+            android:layout_marginTop="24dp"
+            android:contentDescription="Logo" />
 
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:hint="Şifre"
-            android:inputType="textPassword"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:backgroundTint="@android:color/white"/>
-
+        <!-- Başlık -->
         <TextView
-            android:id="@+id/forgotPasswordLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="10dp"
-            android:text="Şifremi Unuttum"
-            android:textColor="@android:color/white"
-            android:padding="4dp"/>
+            android:text="MoodieMovies Üyeliğinizin\nAvantajları"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginTop="12dp"
+            android:textStyle="bold"
+            android:fontFamily="@font/montserrat_bold" />
 
+        <!-- Avantajlar -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔹 Kişiselleştirilmiş Öneriler\n🔹 İzleme Listeniz\n🔹 Puanlarınız\n🔹 MoodieMovies’e Katkıda Bulunun"
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/montserrat_regular" />
+
+        <!-- Giriş Başlığı -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kullanıcı Giriş"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/montserrat_bold" />
+
+        <!-- E-posta -->
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-posta"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#AAAAAA"
+            android:background="@drawable/edittext_backg_gri"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:layout_marginTop="12dp" />
+
+        <!-- Şifre ve Link -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Şifre"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#AAAAAA"
+                android:background="@drawable/edittext_backg_gri"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:layout_marginTop="12dp" />
+
+        </RelativeLayout>
+
+        <!-- Giriş Yap Butonu -->
         <Button
             android:id="@+id/loginButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_height="48dp"
             android:text="Giriş Yap"
-            android:textAllCaps="false"
-            android:background="@drawable/button_background"
-            android:textColor="@android:color/white"/>
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_background_green" />
+
+        <!-- Oturum açık tut -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Oturumumu açık tut. Detaylar"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/montserrat_regular" />
+
+        <TextView
+            android:id="@+id/forgotPasswordText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:text="Parola sıfırlama yardımı"
+            android:textColor="#00B0FF"
+            android:textSize="12sp" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/registerLink"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
-        android:text="Hesabın yok mu? Kayıt Ol"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone"
-        tools:visibility="visible"/>
-
-</RelativeLayout>
+</ScrollView>

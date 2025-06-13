@@ -2,101 +2,125 @@ package com.moodiemovies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import com.moodiemovies.adapter.MovieAdapter;
-import com.moodiemovies.model.Movie;
+import com.moodiemovies.adapter.FilmAdapter;
+import com.moodiemovies.model.Film;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class HomeActivity extends AppCompatActivity {
 
-    private DrawerLayout drawerLayout;
-    private ImageView hamburgerMenu;
-    private FloatingActionButton fabAi;
-    private RecyclerView recommendationsRecyclerView;
-    private MovieAdapter movieAdapter;
-    private List<Movie> movieList;
+    private Button btnRecommend;
+    private ImageView menuIcon;
+    private RecyclerView recyclerLastWatched;
+    private FilmAdapter filmAdapter;
+    private final List<Film> filmList = new ArrayList<>();
+    private final String FILMS_API = "http://10.0.2.2:8080/api/v1/films/last-watched";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        hamburgerMenu = findViewById(R.id.hamburger_menu);
-        fabAi = findViewById(R.id.fab_ai);
-        recommendationsRecyclerView = findViewById(R.id.recommendationsRecyclerView);
+        btnRecommend = findViewById(R.id.btnRecommend);
+        menuIcon = findViewById(R.id.menuIcon);
+        recyclerLastWatched = findViewById(R.id.recyclerLastWatched);
 
-        setupDrawer();
-        setupRecyclerView();
+        recyclerLastWatched.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        filmAdapter = new FilmAdapter(filmList, film -> {
+            Intent intent = new Intent(HomeActivity.this, FilmDetailActivity.class);
+            intent.putExtra("film_id", film.getId());
+            startActivity(intent);
+        });
+        recyclerLastWatched.setAdapter(filmAdapter);
 
-        fabAi.setOnClickListener(v -> {
-            Toast.makeText(HomeActivity.this, "Kişilik testi başlıyor...", Toast.LENGTH_SHORT).show();
-            // TODO: TestActivity'e yönlendirme yapılacak.
-            // Intent intent = new Intent(HomeActivity.this, TestActivity.class);
-            // startActivity(intent);
+        btnRecommend.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, PersonalityTestActivity.class);
+            startActivity(intent);
+        });
+
+        menuIcon.setOnClickListener(this::showPopupMenu);
+
+        fetchFilmsFromApi();
+    }
+
+    private void fetchFilmsFromApi() {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(FILMS_API).build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(() ->
+                        Toast.makeText(HomeActivity.this, "Film listesi alınamadı", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONArray jsonArray = new JSONArray(response.body().string());
+                        filmList.clear();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.getJSONObject(i);
+                            filmList.add(new Film(
+                                    obj.getString("id"),
+                                    obj.getString("title"),
+                                    obj.getString("posterUrl")
+                            ));
+                        }
+                        runOnUiThread(() -> filmAdapter.notifyDataSetChanged());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         });
     }
 
-    private void setupDrawer() {
-        hamburgerMenu.setOnClickListener(v -> {
-            if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
-                drawerLayout.closeDrawer(GravityCompat.END);
-            } else {
-                drawerLayout.openDrawer(GravityCompat.END);
-            }
-        });
+    private void showPopupMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        MenuInflater inflater = popupMenu.getMenuInflater();
+        inflater.inflate(R.menu.menu_navbar, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(item -> onMenuItemClick(item));
+        popupMenu.show();
+    }
 
-        NavigationView navView = findViewById(R.id.nav_view);
-        navView.setNavigationItemSelectedListener(item -> {
-            // Menü tıklama olayları burada yönetilir.
-            int id = item.getItemId();
-            if (id == R.id.drawer_logout) {
-                // TODO: Çıkış yapma işlemleri
-                Toast.makeText(this, "Çıkış yapıldı.", Toast.LENGTH_SHORT).show();
-                // LoginActivity'e geri dön
-                Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
-            // Diğer menü elemanları için de benzer şekilde...
-
-            drawerLayout.closeDrawer(GravityCompat.END);
+    private boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_profile) {
+            startActivity(new Intent(this, ProfileActivity.class));
             return true;
-        });
-    }
-
-    private void setupRecyclerView() {
-        movieList = new ArrayList<>();
-        // TODO: Bu liste ViewModel aracılığıyla backend'den gelen verilerle doldurulacak.
-        // Şimdilik test için manuel veri ekleyelim.
-        // Movie testMovie = new Movie();
-        // testMovie.setTitle("Test Filmi");
-        // testMovie.setPosterUrl("https://...poster.jpg");
-        // movieList.add(testMovie);
-
-        movieAdapter = new MovieAdapter(this, movieList);
-        recommendationsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        recommendationsRecyclerView.setAdapter(movieAdapter);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
-            drawerLayout.closeDrawer(GravityCompat.END);
-        } else {
-            super.onBackPressed();
+        } else if (id == R.id.menu_films) {
+            startActivity(new Intent(this, AllFilmsActivity.class));
+            return true;
+        } else if (id == R.id.menu_logout) {
+            Toast.makeText(this, "Çıkış yapıldı", Toast.LENGTH_SHORT).show();
+            // TODO: token temizleme vb. logout işlemleri
+            return true;
         }
+        return false;
     }
 }

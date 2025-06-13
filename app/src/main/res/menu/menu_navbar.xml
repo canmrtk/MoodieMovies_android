@@ -1,0 +1,5 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_profile" android:title="Profil" />
+    <item android:id="@+id/menu_films" android:title="Tüm Filmler" />
+    <item android:id="@+id/menu_logout" android:title="Çıkış Yap" />
+</menu>
