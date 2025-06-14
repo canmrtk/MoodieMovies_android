@@ -7,6 +7,7 @@ import com.moodiemovies.model.TestSubmissionRequest;
 import com.moodiemovies.network.ApiClient;
 import com.moodiemovies.network.ApiService;
 
+import okhttp3.ResponseBody; // ResponseBody import edildi
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,27 +28,21 @@ public class TestRepository {
         apiService = ApiClient.getClient().create(ApiService.class);
     }
 
-    /**
-     * Kullanıcının test cevaplarını backend'e gönderir.
-     * @param token Yetkilendirme token'ı.
-     * @param request Kullanıcının cevaplarını içeren istek nesnesi.
-     * @return İşlemin başarılı olup olmadığını belirten bir LiveData.
-     */
     public LiveData<Boolean> submitAnswers(String token, TestSubmissionRequest request) {
         MutableLiveData<Boolean> success = new MutableLiveData<>();
 
-        // API servisine isteği gönderiyoruz.
-        apiService.submitTestAnswers("Bearer " + token, request).enqueue(new Callback<Void>() {
+        // HATA DÜZELTİLDİ: Callback<Void> yerine Callback<ResponseBody> kullanıldı.
+        apiService.submitTestAnswers("Bearer " + token, request).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 // HTTP 2xx kodları başarılı sayılır.
-                success.setValue(response.isSuccessful());
+                success.postValue(response.isSuccessful());
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 // Ağ hatası veya başka bir sorun olduğunda başarısız olarak işaretle.
-                success.setValue(false);
+                success.postValue(false);
             }
         });
 

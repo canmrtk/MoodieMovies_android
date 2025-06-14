@@ -7,22 +7,21 @@
     tools:context=".HomeActivity">
 
     <!-- Navbar (üst) -->
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/navbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:padding="16dp"
-        android:gravity="center_vertical"
         android:layout_alignParentTop="true">
 
         <ImageView
+            android:id="@+id/logoImage"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/mmv_logo"
-            android:contentDescription="Logo" />
-
-        <View android:layout_weight="1" android:layout_width="0dp" android:layout_height="0dp"/>
+            android:contentDescription="Logo"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true" />
 
         <ImageView
             android:id="@+id/menuIcon"
@@ -30,8 +29,9 @@
             android:layout_height="28dp"
             android:src="@drawable/ic_menu"
             android:contentDescription="Menu"
-            android:layout_gravity="end"/>
-    </LinearLayout>
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
 
     <!-- Sabit görsel -->
     <ImageView
@@ -49,52 +49,56 @@
     <!-- Alt açıklama -->
     <TextView
         android:id="@+id/bannerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/bannerImage"
-        android:layout_marginTop="12dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
         android:text="İzlediğiniz filmleri takip edin.\nGörmek istediklerinizi kaydedin.\nArkadaşlarınıza neyin iyi olduğunu söyleyin."
         android:textColor="#CCCCCC"
-        android:gravity="center"
-        android:textSize="14sp"
-        android:fontFamily="@font/inriaserif_italic" />
+        android:textSize="14sp" />
 
     <!-- Öneri Butonu -->
     <Button
         android:id="@+id/btnRecommend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/bannerText"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:text="SANA FİLM ÖNEREYİM Mİ?"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
         android:background="@drawable/button_background_green"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:text="SANA FİLM ÖNEREYİM Mİ?"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+    <!-- Popüler Filmler Başlık -->
+    <TextView
+        android:id="@+id/popularMoviesTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"/>
-
-    <!-- En Son Baktıkların Başlık -->
-    <TextView
-        android:id="@+id/lastWatchedTitle"
         android:layout_below="@id/btnRecommend"
-        android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"
-        android:text="EN SON BAKTIKLARIN"
+        android:layout_marginTop="24dp"
+        android:text="BU HAFTA POPÜLER"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        android:textStyle="bold"
-        android:fontFamily="@font/montserrat_bold"/>
+        android:textStyle="bold" />
 
-    <!-- RecyclerView -->
+    <!-- RecyclerView - ID'si düzgün -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerLastWatched"
+        android:id="@+id/recyclerPopularMovies"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/lastWatchedTitle"
+        android:layout_below="@id/popularMoviesTitle"
         android:layout_marginTop="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
         android:layout_marginBottom="24dp"
         android:orientation="horizontal"
+        android:clipToPadding="false"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         tools:listitem="@layout/item_film_card"/>
+
 </RelativeLayout>

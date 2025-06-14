@@ -26,7 +26,6 @@
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:fontFamily="@font/montserrat_bold"
             android:layout_marginTop="12dp" />
 
         <TextView
@@ -76,7 +75,8 @@
             android:layout_height="wrap_content"
             android:textColor="#AAAAAA"
             android:textSize="12sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:visibility="gone" /> <!-- Backend'den gelmediği için şimdilik gizlendi -->
 
         <TextView
             android:id="@+id/filmPlot"
@@ -84,15 +84,14 @@
             android:layout_height="wrap_content"
             android:textColor="#DDDDDD"
             android:textSize="14sp"
-            android:layout_marginTop="12dp"
-            android:fontFamily="@font/montserrat_regular" />
+            android:layout_marginTop="12dp" />
 
         <RatingBar
             android:id="@+id/ratingBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:numStars="5"
-            android:stepSize="1.0"
+            android:stepSize="0.5"
             android:layout_marginTop="12dp" />
 
         <EditText
@@ -102,18 +101,18 @@
             android:hint="Yorum yaz..."
             android:textColor="#FFFFFF"
             android:textColorHint="#AAAAAA"
-            android:background="@drawable/edittext_background"
+            android:background="@drawable/edittext_backg_gri"
             android:padding="12dp"
             android:minHeight="100dp"
             android:gravity="top|start"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/montserrat_regular" />
+            android:layout_marginTop="8dp" />
 
+        <!-- ID GÜNCELLENDİ -->
         <Button
-            android:id="@+id/submitCommentBtn"
+            android:id="@+id/submitReviewBtn"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="Yorumu Gönder"
+            android:text="Değerlendirmeyi Gönder"
             android:background="@drawable/button_background_green"
             android:textColor="#FFFFFF"
             android:layout_marginTop="12dp" />

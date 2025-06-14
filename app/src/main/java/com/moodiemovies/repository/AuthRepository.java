@@ -1,17 +1,12 @@
 package com.moodiemovies.repository;
 
 import android.util.Log;
-
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
 import com.moodiemovies.model.AuthResponse;
 import com.moodiemovies.model.LoginRequest;
-import com.moodiemovies.model.UserDTO;
 import com.moodiemovies.model.UserRegistrationRequestDTO;
 import com.moodiemovies.network.ApiClient;
 import com.moodiemovies.network.ApiService;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,68 +29,72 @@ public class AuthRepository {
     }
 
     /**
-     * Kullanıcıyı email+password ile login eder.
+     * Kullanıcıyı email+password ile login eder. Sonucu verilen MutableLiveData'ya postalar.
      * @param email    Kullanıcının e-posta adresi
      * @param password Kullanıcının şifresi
-     * @return LiveData içinde AuthResponse (başarılıysa gerçek, değilse hata mesajı)
+     * @param liveData Sonucun postalanacağı MutableLiveData nesnesi.
      */
-    public LiveData<AuthResponse> loginUser(String email, String password) {
-        MutableLiveData<AuthResponse> data = new MutableLiveData<>();
-
-        // Doğru LoginRequest oluşturuluyor
+    public void loginUser(String email, String password, MutableLiveData<AuthResponse> liveData) {
         LoginRequest loginRequest = new LoginRequest(email, password);
 
-        apiService.login(loginRequest).enqueue(new Callback<AuthResponse>() {
+        apiService.loginUser(loginRequest).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Başarılı yanıt gelince doğrudan yayımlıyoruz
-                    data.setValue(response.body());
+                    liveData.postValue(response.body());
                 } else {
-                    // HTTP hatası (4xx / 5xx)
                     AuthResponse errorResponse = new AuthResponse();
-                    errorResponse.setMessage("Giriş başarısız (Kod: " + response.code() + ")");
-                    data.setValue(errorResponse);
+                    try {
+                        // Hata mesajını backend'den okumaya çalış
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "{}";
+                        errorResponse.setMessage("Giriş başarısız. Lütfen bilgilerinizi kontrol edin. (Kod: " + response.code() + ")");
+                    } catch (Exception e) {
+                        errorResponse.setMessage("Giriş başarısız (Kod: " + response.code() + ")");
+                    }
+                    liveData.postValue(errorResponse);
                     Log.e(TAG, "loginUser onResponse failure: code=" + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                // Ağ veya diğer hatalar
                 AuthResponse errorResponse = new AuthResponse();
                 errorResponse.setMessage("Sunucuya bağlanılamadı: " + t.getMessage());
-                data.setValue(errorResponse);
+                liveData.postValue(errorResponse);
                 Log.e(TAG, "loginUser onFailure", t);
             }
         });
-
-        return data;
     }
 
     /**
-     * Yeni kullanıcı kaydı yapar.
+     * Yeni kullanıcı kaydı yapar. Sonucu verilen MutableLiveData'ya postalar.
      * @param name     Kullanıcının adı
      * @param email    Kullanıcının e-posta adresi
      * @param password Kullanıcının şifresi
-     * @return LiveData içinde AuthResponse (başarılıysa gerçek, değilse hata mesajı)
+     * @param liveData Sonucun postalanacağı MutableLiveData nesnesi.
      */
-    public LiveData<AuthResponse> registerUser(String name, String email, String password) {
-        MutableLiveData<AuthResponse> data = new MutableLiveData<>();
-
-        // Backend tarafı 'name','email','password' bekliyor
-        UserRegistrationRequestDTO registrationRequest =
-                new UserRegistrationRequestDTO(name, email, password);
+    public void registerUser(String name, String email, String password, MutableLiveData<AuthResponse> liveData) {
+        UserRegistrationRequestDTO registrationRequest = new UserRegistrationRequestDTO(name, email, password);
 
         apiService.registerUser(registrationRequest).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    data.setValue(response.body());
+                    liveData.postValue(response.body());
                 } else {
                     AuthResponse errorResponse = new AuthResponse();
-                    errorResponse.setMessage("Kayıt başarısız (Kod: " + response.code() + ")");
-                    data.setValue(errorResponse);
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "{}";
+                        // Backend'den gelen spesifik hata mesajını yakalamaya çalış
+                        if (errorBody.contains("EmailAlreadyExistsException")) {
+                            errorResponse.setMessage("Bu e-posta adresi zaten kullanımda.");
+                        } else {
+                            errorResponse.setMessage("Kayıt başarısız (Kod: " + response.code() + ")");
+                        }
+                    } catch (Exception e) {
+                        errorResponse.setMessage("Kayıt başarısız (Kod: " + response.code() + ")");
+                    }
+                    liveData.postValue(errorResponse);
                     Log.e(TAG, "registerUser onResponse failure: code=" + response.code());
                 }
             }
@@ -104,11 +103,9 @@ public class AuthRepository {
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 AuthResponse errorResponse = new AuthResponse();
                 errorResponse.setMessage("Sunucuya bağlanılamadı: " + t.getMessage());
-                data.setValue(errorResponse);
+                liveData.postValue(errorResponse);
                 Log.e(TAG, "registerUser onFailure", t);
             }
         });
-
-        return data;
     }
 }

@@ -1,32 +1,49 @@
 package com.moodiemovies.model;
 
-public class Film {
-    private String id;
-    private String title;
-    private String posterUrl;
+import com.google.gson.annotations.SerializedName;
 
-    // 1a. Boş yapıcı (no-arg) ekleyin, böylece new Film() çalışır.
+// Bu sınıf, backend'deki FilmSummaryDTO'ya karşılık gelir.
+public class Film {
+
+    @SerializedName("id")
+    private String id;
+
+    @SerializedName("title")
+    private String title;
+
+    @SerializedName("imageUrl") // Backend'den gelen alan adı "imageUrl"
+    private String imageUrl; // Değişken adını da imageUrl yapalım.
+
     public Film() {}
 
-    // 1b. Parametreli yapıcı hâlâ kalsın:
-    public Film(String id, String title, String posterUrl) {
+    public Film(String id, String title, String imageUrl) {
         this.id = id;
         this.title = title;
-        this.posterUrl = posterUrl;
+        this.imageUrl = imageUrl;
     }
 
-    // 1c. Alias olarak getFilmId() ekleyin:
-    public String getFilmId() {
+    public String getId() {
         return id;
     }
 
-    // Var olan getter/setter’lar:
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getPosterUrl() { return posterUrl; }
-    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    // posterUrl yerine imageUrl kullanacağız.
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

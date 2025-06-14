@@ -1,24 +1,28 @@
 package com.moodiemovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import org.json.JSONObject;
-
-import java.io.IOException;
-
-import okhttp3.*;
+import androidx.lifecycle.ViewModelProvider;
+import com.moodiemovies.model.AuthResponse;
+import com.moodiemovies.model.UserDTO;
+import com.moodiemovies.viewmodel.RegisterViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText, nameEditText;
     private Button registerButton;
-    private final String REGISTER_URL = "http://10.0.2.2:8080/api/v1/auth/register"; // backend adresi
+    private ProgressBar progressBar;
+    private RegisterViewModel registerViewModel;
+    private static final String TAG = "RegisterActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +33,30 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.passwordEditText);
         nameEditText = findViewById(R.id.nameEditText);
         registerButton = findViewById(R.id.registerButton);
+        // activity_register.xml'e bir ProgressBar eklediğinizi varsayıyorum.
+        // progressBar = findViewById(R.id.progressBarRegister);
 
-        registerButton.setOnClickListener(v -> registerUser());
+        registerViewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
+
+        registerViewModel.getRegisterResult().observe(this, authResponse -> {
+            // progressBar.setVisibility(View.GONE);
+            registerButton.setEnabled(true);
+
+            if (authResponse != null && authResponse.getAccessToken() != null && authResponse.getUser() != null) {
+                Toast.makeText(RegisterActivity.this, "Kayıt başarılı!", Toast.LENGTH_SHORT).show();
+                saveAuthInfo(authResponse);
+                navigateToHome();
+            } else {
+                String errorMessage = authResponse != null && authResponse.getMessage() != null ? authResponse.getMessage() : "Kayıt başarısız oldu.";
+                Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        registerButton.setOnClickListener(v -> {
+            registerButton.setEnabled(false);
+            // progressBar.setVisibility(View.VISIBLE);
+            registerUser();
+        });
     }
 
     private void registerUser() {
@@ -40,48 +66,35 @@ public class RegisterActivity extends AppCompatActivity {
 
         if (email.isEmpty() || password.isEmpty() || name.isEmpty()) {
             Toast.makeText(this, "Tüm alanları doldurun", Toast.LENGTH_SHORT).show();
+            registerButton.setEnabled(true);
+            // progressBar.setVisibility(View.GONE);
             return;
         }
 
-        try {
-            JSONObject json = new JSONObject();
-            json.put("email", email);
-            json.put("password", password);
-            json.put("name", name);
+        registerViewModel.register(name, email, password);
+    }
 
-            OkHttpClient client = new OkHttpClient();
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json; charset=utf-8"), json.toString());
+    private void saveAuthInfo(AuthResponse authResponse) {
+        SharedPreferences sharedPreferences = getSharedPreferences("MoodieMoviesPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            Request request = new Request.Builder()
-                    .url(REGISTER_URL)
-                    .post(body)
-                    .build();
+        editor.putString("user_token", authResponse.getAccessToken());
 
-            client.newCall(request).enqueue(new Callback() {
-                @Override public void onFailure(Call call, IOException e) {
-                    runOnUiThread(() -> Toast.makeText(RegisterActivity.this, "Sunucu hatası", Toast.LENGTH_SHORT).show());
-                }
-
-                @Override public void onResponse(Call call, Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "Kayıt başarılı!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                    | Intent.FLAG_ACTIVITY_NEW_TASK
-                                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(RegisterActivity.this, "Kayıt başarısız: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "İstek hazırlanırken hata", Toast.LENGTH_SHORT).show();
+        UserDTO user = authResponse.getUser();
+        if (user != null) {
+            editor.putString("user_id", user.getId());
+            editor.putString("user_name", user.getName());
+            editor.putString("user_email", user.getEmail());
         }
+
+        editor.apply();
+        Log.d(TAG, "Token ve kullanıcı bilgileri kaydedildi. Token: " + authResponse.getAccessToken());
+    }
+
+    private void navigateToHome() {
+        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

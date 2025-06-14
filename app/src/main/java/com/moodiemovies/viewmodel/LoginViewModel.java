@@ -1,6 +1,7 @@
 package com.moodiemovies.viewmodel;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.moodiemovies.model.AuthResponse;
@@ -8,20 +9,22 @@ import com.moodiemovies.repository.AuthRepository;
 
 public class LoginViewModel extends ViewModel {
 
-    private AuthRepository authRepository;
+    private final AuthRepository authRepository;
+    private final MutableLiveData<AuthResponse> loginResult;
 
     public LoginViewModel() {
-        // Repository'nin bir örneğini alıyoruz.
         authRepository = AuthRepository.getInstance();
+        loginResult = new MutableLiveData<>();
     }
 
-    /**
-     * Giriş işlemini başlatır ve sonucu LiveData olarak döndürür.
-     * @param username Kullanıcı adı
-     * @param password Şifre
-     * @return AuthResponse içeren LiveData nesnesi.
-     */
-    public LiveData<AuthResponse> login(String username, String password) {
-        return authRepository.loginUser(username, password);
+    // UI (Activity) bu metodu çağırarak sonucu gözlemleyecek.
+    public LiveData<AuthResponse> getLoginResult() {
+        return loginResult;
+    }
+
+    // Login işlemini tetikleyen metod.
+    public void login(String email, String password) {
+        // Repository'ye isteği yapmasını ve sonucu loginResult'a postalamasını söylüyoruz.
+        authRepository.loginUser(email, password, loginResult);
     }
 }

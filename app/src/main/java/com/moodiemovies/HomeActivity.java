@@ -1,7 +1,10 @@
 package com.moodiemovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,117 +13,112 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.moodiemovies.adapter.FilmAdapter;
 import com.moodiemovies.model.Film;
+import com.moodiemovies.viewmodel.HomeViewModel; // Yeni ViewModel'i import et
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
 public class HomeActivity extends AppCompatActivity {
 
+    private HomeViewModel homeViewModel;
+    private FilmAdapter filmAdapter;
+    private List<Film> filmList = new ArrayList<>();
+    private RecyclerView recyclerPopularMovies;
     private Button btnRecommend;
     private ImageView menuIcon;
-    private RecyclerView recyclerLastWatched;
-    private FilmAdapter filmAdapter;
-    private final List<Film> filmList = new ArrayList<>();
-    private final String FILMS_API = "http://10.0.2.2:8080/api/v1/films/last-watched";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // UI Elemanlarını Bağlama
         btnRecommend = findViewById(R.id.btnRecommend);
         menuIcon = findViewById(R.id.menuIcon);
-        recyclerLastWatched = findViewById(R.id.recyclerLastWatched);
+        recyclerPopularMovies = findViewById(R.id.recyclerPopularMovies);
 
-        recyclerLastWatched.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        filmAdapter = new FilmAdapter(filmList, film -> {
-            Intent intent = new Intent(HomeActivity.this, FilmDetailActivity.class);
-            intent.putExtra("film_id", film.getId());
-            startActivity(intent);
-        });
-        recyclerLastWatched.setAdapter(filmAdapter);
+        // RecyclerView ve Adapter Kurulumu
+        recyclerPopularMovies.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        filmAdapter = new FilmAdapter(filmList, this::openFilmDetail);
+        recyclerPopularMovies.setAdapter(filmAdapter);
 
+        // ViewModel Kurulumu
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
+        // LiveData Gözlemcileri
+        observeViewModel();
+
+        // Buton ve Menü Tıklama Olayları
         btnRecommend.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, PersonalityTestActivity.class);
             startActivity(intent);
         });
-
         menuIcon.setOnClickListener(this::showPopupMenu);
 
-        fetchFilmsFromApi();
+        // Veriyi Çekme
+        homeViewModel.fetchPopularFilms(10); // Ana sayfada 10 popüler film gösterelim
     }
 
-    private void fetchFilmsFromApi() {
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(FILMS_API).build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() ->
-                        Toast.makeText(HomeActivity.this, "Film listesi alınamadı", Toast.LENGTH_SHORT).show());
-            }
-
-            @Override public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONArray jsonArray = new JSONArray(response.body().string());
-                        filmList.clear();
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject obj = jsonArray.getJSONObject(i);
-                            filmList.add(new Film(
-                                    obj.getString("id"),
-                                    obj.getString("title"),
-                                    obj.getString("posterUrl")
-                            ));
-                        }
-                        runOnUiThread(() -> filmAdapter.notifyDataSetChanged());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+    private void observeViewModel() {
+        homeViewModel.getPopularFilms().observe(this, films -> {
+            if (films != null) {
+                filmList.clear();
+                filmList.addAll(films);
+                filmAdapter.notifyDataSetChanged();
             }
         });
+
+        homeViewModel.getErrorMessage().observe(this, error -> {
+            if (error != null && !error.isEmpty()) {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void openFilmDetail(Film film) {
+        Intent intent = new Intent(HomeActivity.this, FilmDetailActivity.class);
+        intent.putExtra("film_id", film.getId());
+        startActivity(intent);
     }
 
     private void showPopupMenu(View view) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         MenuInflater inflater = popupMenu.getMenuInflater();
         inflater.inflate(R.menu.menu_navbar, popupMenu.getMenu());
-        popupMenu.setOnMenuItemClickListener(item -> onMenuItemClick(item));
+        popupMenu.setOnMenuItemClickListener(this::onMenuItemClick);
         popupMenu.show();
     }
 
     private boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.menu_profile) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_profile) {
             startActivity(new Intent(this, ProfileActivity.class));
             return true;
-        } else if (id == R.id.menu_films) {
+        } else if (itemId == R.id.menu_films) {
             startActivity(new Intent(this, AllFilmsActivity.class));
             return true;
-        } else if (id == R.id.menu_logout) {
-            Toast.makeText(this, "Çıkış yapıldı", Toast.LENGTH_SHORT).show();
-            // TODO: token temizleme vb. logout işlemleri
+        } else if (itemId == R.id.menu_logout) {
+            logoutUser();
             return true;
         }
         return false;
+    }
+
+    private void logoutUser() {
+        SharedPreferences prefs = getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE);
+        prefs.edit().clear().apply();
+
+        Intent intent = new Intent(this, WelcomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+        Toast.makeText(this, "Çıkış yapıldı", Toast.LENGTH_SHORT).show();
     }
 }

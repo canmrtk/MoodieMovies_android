@@ -5,8 +5,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,19 +16,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.Gson;
 import com.moodiemovies.adapter.FilmAdapter;
 import com.moodiemovies.adapter.ListAdapter;
 import com.moodiemovies.adapter.RatingAdapter;
 import com.moodiemovies.model.Film;
 import com.moodiemovies.model.FilmListSummary;
+import com.moodiemovies.model.ProfileData; // Yeni modelimizi import ediyoruz
 import com.moodiemovies.model.RatingItem;
 
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -41,31 +43,44 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView avatarImage;
     private TextInputEditText usernameEdit;
     private ImageView editButton;
+    private TextView favCountText, listCountText, ratingCountText;
     private RecyclerView favoritesRecycler, listsRecycler, ratingsRecycler;
 
     private final OkHttpClient client = new OkHttpClient();
+    private final Gson gson = new Gson();
+    private static final String TAG = "ProfileActivity";
+    // Backend endpoint'leri
     private static final String PROFILE_API = "http://10.0.2.2:8080/api/v1/users/me";
-    private static final String UPDATE_API  = "http://10.0.2.2:8080/api/v1/users/me";
-    private static final String AVATAR_BASE_URL = "http://10.0.2.2:8080/api/v1/avatars/";
+    // Güncelleme için user ID'yi URL'e ekleyeceğiz.
+    private static final String UPDATE_API_BASE = "http://10.0.2.2:8080/api/v1/users/";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        avatarImage      = findViewById(R.id.avatarImage);
-        usernameEdit     = findViewById(R.id.usernameEdit);
-        editButton       = findViewById(R.id.editButton);
-        favoritesRecycler= findViewById(R.id.favoritesRecycler);
-        listsRecycler    = findViewById(R.id.listsRecycler);
-        ratingsRecycler  = findViewById(R.id.ratingsRecycler);
+        // View'leri bağla
+        avatarImage = findViewById(R.id.avatarImage);
+        usernameEdit = findViewById(R.id.usernameEdit);
+        editButton = findViewById(R.id.editButton);
+        favCountText = findViewById(R.id.favCountText);
+        listCountText = findViewById(R.id.listCountText);
+        ratingCountText = findViewById(R.id.ratingCountText);
+        favoritesRecycler = findViewById(R.id.favoritesRecycler);
+        listsRecycler = findViewById(R.id.listsRecycler);
+        ratingsRecycler = findViewById(R.id.ratingsRecycler);
 
-        favoritesRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        listsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        ratingsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        // RecyclerView'ları ayarla
+        setupRecyclerViews();
 
         editButton.setOnClickListener(v -> updateUsername());
         loadProfileData();
+    }
+
+    private void setupRecyclerViews() {
+        favoritesRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        listsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        ratingsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
 
     private void loadProfileData() {
@@ -75,111 +90,116 @@ public class ProfileActivity extends AppCompatActivity {
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
-                Log.e("Profile", "HTTP fail", e);
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, "Profil verisi alınamadı", e);
+                runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Profil verisi alınamadı.", Toast.LENGTH_SHORT).show());
             }
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if (response.isSuccessful() && response.body() != null) {
                     try {
-                        JSONObject json = new JSONObject(response.body().string());
-                        runOnUiThread(() -> bindProfile(json));
+                        String responseString = response.body().string();
+                        Log.d(TAG, "Profil Yanıtı: " + responseString);
+                        // Yeni model sınıfımızı kullanarak JSON'ı parse ediyoruz.
+                        ProfileData profileData = gson.fromJson(responseString, ProfileData.class);
+                        runOnUiThread(() -> bindProfile(profileData));
                     } catch (Exception e) {
-                        Log.e("Profile", "JSON parse", e);
+                        Log.e(TAG, "Profil JSON parse hatası", e);
                     }
+                } else {
+                    Log.e(TAG, "Profil isteği başarısız: " + response.code());
                 }
             }
         });
     }
 
-    private void bindProfile(JSONObject json) {
-        try {
-            // Avatar
-            String avatarId = json.getString("avatarId");
+    private void bindProfile(ProfileData data) {
+        if (data == null) return;
+
+        // Kullanıcı bilgileri
+        if (data.getUser() != null) {
+            usernameEdit.setText(data.getUser().getName()); // 'username' yerine 'name'
+            favCountText.setText(String.valueOf(data.getUser().getFavoriteCount()));
+            listCountText.setText(String.valueOf(data.getUser().getListCount()));
+            ratingCountText.setText(String.valueOf(data.getUser().getRatingCount()));
+
+            // Avatarı yükle
             Glide.with(this)
-                    .load(AVATAR_BASE_URL + avatarId)
+                    .load(data.getUser().getAvatarImageUrl()) // 'avatarImageUrl' kullanılıyor.
+                    .placeholder(R.drawable.placeholder_avatar)
+                    .error(R.drawable.placeholder_error)
                     .into(avatarImage);
+        }
 
-            // Kullanıcı adı
-            usernameEdit.setText(json.getString("username"));
+        // Favori Filmler
+        if (data.getFavorites() != null) {
+            favoritesRecycler.setAdapter(new FilmAdapter(data.getFavorites(), this::openFilmDetail));
+        }
 
-            // Favori Filmler
-            JSONArray favs = json.getJSONArray("favorites");
-            List<Film> favFilms = new ArrayList<>();
-            for (int i = 0; i < favs.length(); i++) {
-                JSONObject f = favs.getJSONObject(i);
-                Film film = new Film();
-                film.setId(f.getString("id"));
-                film.setTitle(f.getString("title"));
-                film.setPosterUrl(f.getString("posterUrl"));
-                favFilms.add(film);
-            }
-            favoritesRecycler.setAdapter(new FilmAdapter(favFilms, this::openFilmDetail));
+        // Listeler
+        if (data.getLists() != null) {
+            listsRecycler.setAdapter(new ListAdapter(data.getLists(), this::openListDetail));
+        }
 
-            // Listeler
-            JSONArray listsArr = json.getJSONArray("lists");
-            List<FilmListSummary> listSummaries = new ArrayList<>();
-            for (int i = 0; i < listsArr.length(); i++) {
-                JSONObject l = listsArr.getJSONObject(i);
-                FilmListSummary list = new FilmListSummary();
-                list.setListId(l.getString("id"));
-                list.setName(l.getString("name"));
-                list.setCoverImageUrl(l.getString("coverImageUrl"));
-                listSummaries.add(list);
-            }
-            listsRecycler.setAdapter(new ListAdapter(listSummaries, this::openListDetail));
-
-            // Puanlamalar
-            JSONArray ratingsArr = json.getJSONArray("ratings");
-            List<RatingItem> ratingItems = new ArrayList<>();
-            for (int i = 0; i < ratingsArr.length(); i++) {
-                JSONObject r = ratingsArr.getJSONObject(i);
-                ratingItems.add(new RatingItem(
-                        r.getString("filmId"),
-                        r.getString("title"),
-                        r.getString("posterUrl"),
-                        r.getDouble("rating")
-                ));
-            }
-            ratingsRecycler.setAdapter(new RatingAdapter(ratingItems, item -> {
-                Film film = new Film(item.getFilmId(), item.getTitle(), item.getPosterUrl());
-                openFilmDetail(film);
-            }));
-
-        } catch (Exception e) {
-            Log.e("Profile", "bind error", e);
+        // Puanlamalar
+        if (data.getRatings() != null) {
+            ratingsRecycler.setAdapter(new RatingAdapter(data.getRatings(), item -> openFilmDetail(new Film(item.getFilmId(), item.getTitle(), item.getPosterUrl()))));
         }
     }
 
     private void updateUsername() {
+        String newName = usernameEdit.getText().toString().trim();
+        String userId = getUserId();
+
+        if (newName.isEmpty() || userId == null) {
+            Toast.makeText(this, "Kullanıcı adı boş olamaz veya kullanıcı ID bulunamadı.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String url = UPDATE_API_BASE + userId;
+
+        JSONObject bodyJson = new JSONObject();
         try {
-            JSONObject body = new JSONObject();
-            body.put("username", usernameEdit.getText().toString());
+            // Backend'deki UserUpdateRequestDTO 'name' alanı bekliyor.
+            bodyJson.put("name", newName);
+        } catch (JSONException e) {
+            Log.e(TAG, "Güncelleme JSON oluşturma hatası", e);
+            return;
+        }
 
-            RequestBody rb = RequestBody.create(
-                    MediaType.parse("application/json"), body.toString()
-            );
-            Request req = new Request.Builder()
-                    .url(UPDATE_API)
-                    .put(rb)
-                    .addHeader("Authorization", "Bearer " + getToken())
-                    .build();
+        RequestBody body = RequestBody.create(bodyJson.toString(), MediaType.parse("application/json"));
+        Request request = new Request.Builder()
+                .url(url)
+                .put(body) // PUT isteği
+                .addHeader("Authorization", "Bearer " + getToken())
+                .build();
 
-            client.newCall(req).enqueue(new Callback() {
-                @Override public void onFailure(Call call, IOException e) { }
-                @Override public void onResponse(Call call, Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        Toast.makeText(ProfileActivity.this,
-                                response.isSuccessful() ? "Güncellendi" : "Hata",
-                                Toast.LENGTH_SHORT).show();
-                    });
-                }
-            });
-        } catch (Exception e) { e.printStackTrace(); }
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Güncelleme başarısız.", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(ProfileActivity.this, "Kullanıcı adı güncellendi.", Toast.LENGTH_SHORT).show();
+                        // SharedPreferences'teki adı da güncelle
+                        getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE).edit().putString("user_name", newName).apply();
+                    } else {
+                        Toast.makeText(ProfileActivity.this, "Güncelleme başarısız: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void openFilmDetail(Film film) {
         Intent i = new Intent(this, FilmDetailActivity.class);
-        i.putExtra("film_id", film.getFilmId());
+        i.putExtra("film_id", film.getId());
         startActivity(i);
     }
 
@@ -190,7 +210,10 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private String getToken() {
-        return getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE)
-                .getString("user_token", null);
+        return getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE).getString("user_token", null);
+    }
+
+    private String getUserId() {
+        return getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE).getString("user_id", null);
     }
 }

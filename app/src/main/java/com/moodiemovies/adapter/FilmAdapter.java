@@ -5,14 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.moodiemovies.R;
 import com.moodiemovies.model.Film;
-
 import java.util.List;
 
 public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder> {
@@ -32,21 +29,16 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder
     @NonNull
     @Override
     public FilmViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // item_film_card layout'unu kullandığımızdan emin olalım
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_movie, parent, false);
+                .inflate(R.layout.item_film_card, parent, false);
         return new FilmViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull FilmViewHolder holder, int position) {
         Film film = films.get(position);
-        holder.title.setText(film.getTitle());
-        Glide.with(holder.poster.getContext())
-                .load(film.getPosterUrl())
-                .placeholder(R.drawable.default_avatar) // ya da uygun bir placeholder
-                .into(holder.poster);
-
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(film));
+        holder.bind(film, listener);
     }
 
     @Override
@@ -60,8 +52,21 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmViewHolder
 
         FilmViewHolder(@NonNull View itemView) {
             super(itemView);
-            poster = itemView.findViewById(R.id.moviePoster);
-            title  = itemView.findViewById(R.id.movieTitle);
+            poster = itemView.findViewById(R.id.posterImage);
+            title  = itemView.findViewById(R.id.titleText);
+        }
+
+        void bind(final Film film, final OnItemClickListener listener) {
+            title.setText(film.getTitle());
+
+            // posterUrl yerine getImageUrl() kullanılıyor.
+            Glide.with(itemView.getContext())
+                    .load(film.getImageUrl())
+                    .placeholder(R.drawable.placeholder) // Genel bir placeholder
+                    .error(R.drawable.ic_films_placeholder) // Hata durumunda gösterilecek ikon
+                    .into(poster);
+
+            itemView.setOnClickListener(v -> listener.onItemClick(film));
         }
     }
 }

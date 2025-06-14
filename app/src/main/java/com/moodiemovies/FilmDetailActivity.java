@@ -1,50 +1,73 @@
-// FilmDetailActivity.java
 package com.moodiemovies;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
-
-import org.json.JSONObject;
-
+import com.moodiemovies.model.FilmDetail;
+import com.moodiemovies.model.FilmRatingRequestDTO;
+import com.moodiemovies.network.ApiClient;
+import com.moodiemovies.network.ApiService;
+import com.moodiemovies.viewmodel.FilmDetailViewModel;
 import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FilmDetailActivity extends AppCompatActivity {
 
+    private FilmDetailViewModel viewModel;
     private ImageView filmPoster;
-    private TextView filmTitle, filmYear, filmGenre, filmCountry, filmDuration, filmRating, filmPlot, ratingCountText;
+    private TextView filmTitle, filmYear, filmGenre, filmCountry, filmDuration, filmRating, filmPlot;
     private RatingBar ratingBar;
     private EditText commentInput;
-    private Button submitCommentBtn, favoriteButton;
-
-    private final OkHttpClient client = new OkHttpClient();
-    private final String FILM_DETAIL_API = "http://10.0.2.2:8080/api/v1/films/"; // + filmId
-    private final String COMMENT_API = "http://10.0.2.2:8080/api/v1/comments";
-    private final String FAVORITE_API = "http://10.0.2.2:8080/api/v1/favorites";
+    private Button submitReviewBtn, favoriteButton;
 
     private String filmId;
+    private ApiService apiService; // Etkileşimler için
+    private static final String TAG = "FilmDetailActivity";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_film_detail);
 
+        // View'leri ve API servisini başlat
+        initViews();
+        apiService = ApiClient.getClient().create(ApiService.class);
+
+        // Intent'ten film ID'sini al
+        filmId = getIntent().getStringExtra("film_id");
+        if (filmId == null || filmId.isEmpty()) {
+            Toast.makeText(this, "Film ID bulunamadı.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // ViewModel kurulumu
+        viewModel = new ViewModelProvider(this).get(FilmDetailViewModel.class);
+        observeViewModel();
+
+        // Buton olayları
+        submitReviewBtn.setOnClickListener(v -> submitReview());
+        favoriteButton.setOnClickListener(v -> toggleFavorite());
+
+        // Veriyi çek
+        viewModel.fetchFilmDetails(filmId);
+    }
+
+    private void initViews() {
         filmPoster = findViewById(R.id.filmPoster);
         filmTitle = findViewById(R.id.filmTitle);
         filmYear = findViewById(R.id.filmYear);
@@ -52,127 +75,96 @@ public class FilmDetailActivity extends AppCompatActivity {
         filmCountry = findViewById(R.id.filmCountry);
         filmDuration = findViewById(R.id.filmDuration);
         filmRating = findViewById(R.id.filmRating);
-        ratingCountText = findViewById(R.id.ratingCount);
         filmPlot = findViewById(R.id.filmPlot);
         ratingBar = findViewById(R.id.ratingBar);
         commentInput = findViewById(R.id.commentInput);
-        submitCommentBtn = findViewById(R.id.submitCommentBtn);
+        submitReviewBtn = findViewById(R.id.submitReviewBtn);
         favoriteButton = findViewById(R.id.favoriteButton);
-
-        filmId = getIntent().getStringExtra("film_id");
-
-        loadFilmDetail(filmId);
-
-        submitCommentBtn.setOnClickListener(v -> sendComment());
-        favoriteButton.setOnClickListener(v -> addToFavorites());
     }
 
-    private void loadFilmDetail(String filmId) {
-        Request request = new Request.Builder()
-                .url(FILM_DETAIL_API + filmId)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> Toast.makeText(FilmDetailActivity.this, "Hata oluştu", Toast.LENGTH_SHORT).show());
-            }
-
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject json = new JSONObject(response.body().string());
-
-                        runOnUiThread(() -> {
-                            try {
-                                filmTitle.setText(json.getString("title"));
-                                filmYear.setText("(" + json.getInt("year") + ")");
-                                filmGenre.setText(json.getString("genres"));
-                                filmCountry.setText(json.getString("country"));
-                                filmDuration.setText(json.getInt("duration") + " dk");
-                                filmRating.setText(json.getDouble("rating") + "/10");
-                                ratingCountText.setText("(" + json.getInt("ratingCount") + " değerlendirme)");
-                                filmPlot.setText(json.getString("plot"));
-
-                                Glide.with(FilmDetailActivity.this)
-                                        .load(json.getString("posterUrl"))
-                                        .into(filmPoster);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+    private void observeViewModel() {
+        viewModel.getFilmDetail().observe(this, this::bindFilmData);
+        viewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show();
         });
     }
 
-    private void sendComment() {
-        try {
-            JSONObject json = new JSONObject();
-            json.put("filmId", filmId);
-            json.put("comment", commentInput.getText().toString());
-            json.put("rating", ratingBar.getRating());
+    private void bindFilmData(FilmDetail film) {
+        if (film == null) return;
 
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json"), json.toString());
+        filmTitle.setText(film.getTitle() != null ? film.getTitle() : "Başlık Yok");
+        filmYear.setText(film.getReleaseYear() != null ? "(" + film.getReleaseYear() + ")" : "");
 
-            Request request = new Request.Builder()
-                    .url(COMMENT_API)
-                    .post(body)
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override public void onFailure(Call call, IOException e) {
-                    runOnUiThread(() -> Toast.makeText(FilmDetailActivity.this, "Yorum gönderilemedi", Toast.LENGTH_SHORT).show());
-                }
-
-                @Override public void onResponse(Call call, Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(FilmDetailActivity.this, "Yorum kaydedildi", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(FilmDetailActivity.this, "Sunucu hatası", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            filmGenre.setText(String.join(", ", film.getGenres()));
+        } else {
+            filmGenre.setText("");
         }
+
+        filmCountry.setText(film.getCountry() != null ? film.getCountry() : "");
+        filmDuration.setText(film.getFormattedDuration() != null ? film.getFormattedDuration() : "");
+
+        if (film.getAverageRating() != null) {
+            filmRating.setText(String.format("%.1f/10", film.getAverageRating().doubleValue()));
+        } else {
+            filmRating.setText("N/A");
+        }
+
+        filmPlot.setText(film.getPlot() != null ? film.getPlot() : "Açıklama bulunmuyor.");
+
+        Glide.with(this)
+                .load(film.getImageUrl())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder_error)
+                .into(filmPoster);
     }
 
-    private void addToFavorites() {
-        try {
-            JSONObject json = new JSONObject();
-            json.put("filmId", filmId);
+    private void submitReview() {
+        float ratingValue = ratingBar.getRating();
+        String commentText = commentInput.getText().toString();
 
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json"), json.toString());
-
-            Request request = new Request.Builder()
-                    .url(FAVORITE_API)
-                    .post(body)
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override public void onFailure(Call call, IOException e) {
-                    runOnUiThread(() -> Toast.makeText(FilmDetailActivity.this, "Favori eklenemedi", Toast.LENGTH_SHORT).show());
-                }
-
-                @Override public void onResponse(Call call, Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(FilmDetailActivity.this, "Favorilere eklendi", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(FilmDetailActivity.this, "Sunucu hatası", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (ratingValue == 0) {
+            Toast.makeText(this, "Lütfen puan vermek için yıldızları kullanın.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        FilmRatingRequestDTO requestDTO = new FilmRatingRequestDTO((int) (ratingValue * 2), commentText);
+
+        apiService.rateFilm("Bearer " + getToken(), filmId, requestDTO).enqueue(
+                getGenericCallback("Değerlendirme kaydedildi", "Değerlendirme gönderilemedi")
+        );
+    }
+
+    private void toggleFavorite() {
+        apiService.toggleFavorite("Bearer " + getToken(), filmId).enqueue(
+                getGenericCallback("Favori durumu güncellendi", "Favori durumu güncellenemedi")
+        );
+    }
+
+    private Callback<ResponseBody> getGenericCallback(String successMessage, String failureMessage) {
+        return new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(FilmDetailActivity.this, successMessage, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e(TAG, failureMessage + " - Kod: " + response.code());
+                        Toast.makeText(FilmDetailActivity.this, failureMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Log.e(TAG, failureMessage, t);
+                runOnUiThread(() -> Toast.makeText(FilmDetailActivity.this, failureMessage, Toast.LENGTH_SHORT).show());
+            }
+        };
+    }
+
+    private String getToken() {
+        SharedPreferences prefs = getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE);
+        return prefs.getString("user_token", null);
     }
 }
