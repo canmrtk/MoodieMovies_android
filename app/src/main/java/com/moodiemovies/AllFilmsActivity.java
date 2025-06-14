@@ -71,7 +71,7 @@ public class AllFilmsActivity extends AppCompatActivity {
                             JSONObject f = arr.getJSONObject(i);
                             films.add(new Film(
                                     f.getString("id"),
-                                    f.getString("filmName"),   // backend’deki field name
+                                    f.getString("title"),   // backend’deki field name
                                     f.getString("imageUrl")     // summary DTO’daki resim URL’i
                             ));
                         }

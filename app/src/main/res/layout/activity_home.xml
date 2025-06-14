@@ -82,7 +82,7 @@
         android:layout_below="@id/btnRecommend"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:text="BU HAFTA POPÜLER"
+        android:text="BUNLARA BAKABİLİRSİNİZ"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
         android:textStyle="bold" />

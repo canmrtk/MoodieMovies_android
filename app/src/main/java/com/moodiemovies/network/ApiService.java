@@ -6,6 +6,7 @@ import com.moodiemovies.model.FilmDetail;
 import com.moodiemovies.model.FilmPage;
 import com.moodiemovies.model.FilmRatingRequestDTO;
 import com.moodiemovies.model.LoginRequest;
+import com.moodiemovies.model.ProfileData;
 import com.moodiemovies.model.TestSubmissionRequest;
 import com.moodiemovies.model.UserDTO;
 import com.moodiemovies.model.UserRegistrationRequestDTO;
@@ -41,7 +42,8 @@ public interface ApiService {
     // Varsayımsal olarak backend'de /auth/google olduğunu varsayalım.
     @POST("api/v1/auth/google")
     Call<AuthResponse> loginWithGoogle(@Body Map<String, String> idToken);
-
+    @GET("api/v1/users/me/profile-data")
+    Call<ProfileData> getProfileData(@Header("Authorization") String token);
     // --- User Endpoints ---
     @GET("api/v1/users/me")
     Call<UserDTO> getCurrentUser(@Header("Authorization") String token);

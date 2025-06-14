@@ -16,27 +16,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
 import com.moodiemovies.adapter.FilmAdapter;
 import com.moodiemovies.adapter.ListAdapter;
 import com.moodiemovies.adapter.RatingAdapter;
 import com.moodiemovies.model.Film;
 import com.moodiemovies.model.FilmListSummary;
-import com.moodiemovies.model.ProfileData; // Yeni modelimizi import ediyoruz
-import com.moodiemovies.model.RatingItem;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.moodiemovies.model.ProfileData;
+import com.moodiemovies.model.RatedFilmDTO;
+import com.moodiemovies.model.UserUpdateRequestDTO;
+import com.moodiemovies.network.ApiClient;
+import com.moodiemovies.network.ApiService;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -46,20 +42,23 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView favCountText, listCountText, ratingCountText;
     private RecyclerView favoritesRecycler, listsRecycler, ratingsRecycler;
 
-    private final OkHttpClient client = new OkHttpClient();
-    private final Gson gson = new Gson();
+    private ApiService apiService;
     private static final String TAG = "ProfileActivity";
-    // Backend endpoint'leri
-    private static final String PROFILE_API = "http://10.0.2.2:8080/api/v1/users/me";
-    // Güncelleme için user ID'yi URL'e ekleyeceğiz.
-    private static final String UPDATE_API_BASE = "http://10.0.2.2:8080/api/v1/users/";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // View'leri bağla
+        apiService = ApiClient.getClient().create(ApiService.class);
+        initViews();
+        setupRecyclerViews();
+
+        editButton.setOnClickListener(v -> updateUsername());
+        loadProfileData();
+    }
+
+    private void initViews() {
         avatarImage = findViewById(R.id.avatarImage);
         usernameEdit = findViewById(R.id.usernameEdit);
         editButton = findViewById(R.id.editButton);
@@ -69,12 +68,6 @@ public class ProfileActivity extends AppCompatActivity {
         favoritesRecycler = findViewById(R.id.favoritesRecycler);
         listsRecycler = findViewById(R.id.listsRecycler);
         ratingsRecycler = findViewById(R.id.ratingsRecycler);
-
-        // RecyclerView'ları ayarla
-        setupRecyclerViews();
-
-        editButton.setOnClickListener(v -> updateUsername());
-        loadProfileData();
     }
 
     private void setupRecyclerViews() {
@@ -84,33 +77,22 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadProfileData() {
-        Request request = new Request.Builder()
-                .url(PROFILE_API)
-                .addHeader("Authorization", "Bearer " + getToken())
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
+        apiService.getProfileData("Bearer " + getToken()).enqueue(new Callback<ProfileData>() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "Profil verisi alınamadı", e);
-                runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Profil verisi alınamadı.", Toast.LENGTH_SHORT).show());
+            public void onResponse(@NonNull Call<ProfileData> call, @NonNull Response<ProfileData> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ProfileData profileData = response.body();
+                    runOnUiThread(() -> bindProfile(profileData));
+                } else {
+                    Log.e(TAG, "Profil isteği başarısız: " + response.code());
+                    runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Profil verisi alınamadı.", Toast.LENGTH_SHORT).show());
+                }
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        String responseString = response.body().string();
-                        Log.d(TAG, "Profil Yanıtı: " + responseString);
-                        // Yeni model sınıfımızı kullanarak JSON'ı parse ediyoruz.
-                        ProfileData profileData = gson.fromJson(responseString, ProfileData.class);
-                        runOnUiThread(() -> bindProfile(profileData));
-                    } catch (Exception e) {
-                        Log.e(TAG, "Profil JSON parse hatası", e);
-                    }
-                } else {
-                    Log.e(TAG, "Profil isteği başarısız: " + response.code());
-                }
+            public void onFailure(@NonNull Call<ProfileData> call, @NonNull Throwable t) {
+                Log.e(TAG, "Profil verisi alınamadı", t);
+                runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Ağ hatası: " + t.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -118,34 +100,39 @@ public class ProfileActivity extends AppCompatActivity {
     private void bindProfile(ProfileData data) {
         if (data == null) return;
 
-        // Kullanıcı bilgileri
         if (data.getUser() != null) {
-            usernameEdit.setText(data.getUser().getName()); // 'username' yerine 'name'
+            usernameEdit.setText(data.getUser().getName());
             favCountText.setText(String.valueOf(data.getUser().getFavoriteCount()));
             listCountText.setText(String.valueOf(data.getUser().getListCount()));
             ratingCountText.setText(String.valueOf(data.getUser().getRatingCount()));
 
-            // Avatarı yükle
             Glide.with(this)
-                    .load(data.getUser().getAvatarImageUrl()) // 'avatarImageUrl' kullanılıyor.
+                    .load(data.getUser().getAvatarImageUrl())
                     .placeholder(R.drawable.placeholder_avatar)
                     .error(R.drawable.placeholder_error)
                     .into(avatarImage);
         }
 
-        // Favori Filmler
         if (data.getFavorites() != null) {
             favoritesRecycler.setAdapter(new FilmAdapter(data.getFavorites(), this::openFilmDetail));
         }
 
-        // Listeler
         if (data.getLists() != null) {
             listsRecycler.setAdapter(new ListAdapter(data.getLists(), this::openListDetail));
         }
 
-        // Puanlamalar
         if (data.getRatings() != null) {
-            ratingsRecycler.setAdapter(new RatingAdapter(data.getRatings(), item -> openFilmDetail(new Film(item.getFilmId(), item.getTitle(), item.getPosterUrl()))));
+            // RatedFilmDTO'yu eski RatingItem modeline dönüştürmemiz gerekiyor.
+            // Çünkü RatingAdapter hala onu bekliyor.
+            ratingsRecycler.setAdapter(new RatingAdapter(
+                    data.getRatings().stream().map(ratedFilm -> new com.moodiemovies.model.RatingItem(
+                            ratedFilm.getFilm().getId(),
+                            ratedFilm.getFilm().getTitle(),
+                            ratedFilm.getFilm().getImageUrl(),
+                            ratedFilm.getUserRating() != null ? ratedFilm.getUserRating() : 0.0
+                    )).collect(Collectors.toList()),
+                    item -> openFilmDetail(new Film(item.getFilmId(), item.getTitle(), item.getPosterUrl()))
+            ));
         }
     }
 
@@ -154,45 +141,27 @@ public class ProfileActivity extends AppCompatActivity {
         String userId = getUserId();
 
         if (newName.isEmpty() || userId == null) {
-            Toast.makeText(this, "Kullanıcı adı boş olamaz veya kullanıcı ID bulunamadı.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Kullanıcı adı boş olamaz.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String url = UPDATE_API_BASE + userId;
-
-        JSONObject bodyJson = new JSONObject();
-        try {
-            // Backend'deki UserUpdateRequestDTO 'name' alanı bekliyor.
-            bodyJson.put("name", newName);
-        } catch (JSONException e) {
-            Log.e(TAG, "Güncelleme JSON oluşturma hatası", e);
-            return;
-        }
-
-        RequestBody body = RequestBody.create(bodyJson.toString(), MediaType.parse("application/json"));
-        Request request = new Request.Builder()
-                .url(url)
-                .put(body) // PUT isteği
-                .addHeader("Authorization", "Bearer " + getToken())
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
+        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO(newName);
+        apiService.updateUserProfile("Bearer " + getToken(), userId, updateRequest).enqueue(new Callback<com.moodiemovies.model.UserDTO>() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Güncelleme başarısız.", Toast.LENGTH_SHORT).show());
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
+            public void onResponse(@NonNull Call<com.moodiemovies.model.UserDTO> call, @NonNull Response<com.moodiemovies.model.UserDTO> response) {
                 runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         Toast.makeText(ProfileActivity.this, "Kullanıcı adı güncellendi.", Toast.LENGTH_SHORT).show();
-                        // SharedPreferences'teki adı da güncelle
                         getSharedPreferences("MoodieMoviesPrefs", MODE_PRIVATE).edit().putString("user_name", newName).apply();
                     } else {
                         Toast.makeText(ProfileActivity.this, "Güncelleme başarısız: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
                 });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<com.moodiemovies.model.UserDTO> call, @NonNull Throwable t) {
+                runOnUiThread(() -> Toast.makeText(ProfileActivity.this, "Güncelleme başarısız.", Toast.LENGTH_SHORT).show());
             }
         });
     }

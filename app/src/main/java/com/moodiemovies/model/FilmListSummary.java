@@ -1,74 +1,39 @@
+// app/src/main/java/com/moodiemovies/model/FilmListSummary.java
 package com.moodiemovies.model;
 
+import com.google.gson.annotations.SerializedName;
+import java.util.List;
+
 public class FilmListSummary {
+    @SerializedName("listId")
     private String listId;
+    @SerializedName("name")
     private String name;
+    @SerializedName("tag")
     private String tag;
+    @SerializedName("filmCount")
     private int filmCount;
-    private int visibility; // 0: private, 1: public
+    @SerializedName("visibility")
+    private int visibility;
+    @SerializedName("owner")
     private UserSummary owner;
-    private String coverImageUrl;
+    @SerializedName("films")
+    private List<Film> films; // İlk birkaç filmin öngörünümü için
 
-    // No-arg constructor
-    public FilmListSummary() { }
+    // Getters and Setters
+    public String getListId() { return listId; }
+    public String getName() { return name; }
+    public String getTag() { return tag; }
+    public int getFilmCount() { return filmCount; }
+    public int getVisibility() { return visibility; }
+    public UserSummary getOwner() { return owner; }
+    public List<Film> getFilms() { return films; }
 
-    // All-args constructor (optional)
-    public FilmListSummary(String listId, String name, String tag, int filmCount, int visibility, UserSummary owner, String coverImageUrl) {
-        this.listId       = listId;
-        this.name         = name;
-        this.tag          = tag;
-        this.filmCount    = filmCount;
-        this.visibility   = visibility;
-        this.owner        = owner;
-        this.coverImageUrl = coverImageUrl;
-    }
-
-    public String getListId() {
-        return listId;
-    }
-    public void setListId(String listId) {
-        this.listId = listId;
-    }
-
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public int getFilmCount() {
-        return filmCount;
-    }
-    public void setFilmCount(int filmCount) {
-        this.filmCount = filmCount;
-    }
-
-    public int getVisibility() {
-        return visibility;
-    }
-    public void setVisibility(int visibility) {
-        this.visibility = visibility;
-    }
-
-    public UserSummary getOwner() {
-        return owner;
-    }
-    public void setOwner(UserSummary owner) {
-        this.owner = owner;
-    }
-
+    // Kapak resmini listedeki ilk filmden al
     public String getCoverImageUrl() {
-        return coverImageUrl;
-    }
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
+        if (films != null && !films.isEmpty() && films.get(0) != null) {
+            return films.get(0).getImageUrl();
+        }
+        return null;
     }
 }
